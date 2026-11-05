@@ -1,15 +1,18 @@
 # RelayRunner GitHub Actions
 
-Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends your GitHub Actions jobs to one of your own machines when one is online and free, and to GitHub's hosted runners when not.
+Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends each GitHub Actions job to the first runner in your workspace's runner order that can take it, such as one of your own machines when one is online and free, or GitHub's hosted runners.
 
 ## Relay a job to a runner
 
-Add a `relay` job, then point the job you want routed at its output:
+Add a `relay` job that says which runners can run your job, then point the job at its output:
 
 ```yaml
 jobs:
   relay:
     uses: relayrunner/actions/.github/workflows/relay.yml@v1
+    with:
+      machine: self-hosted    # any machine in your workspace
+      github: ubuntu-latest   # or GitHub-hosted ubuntu-latest
 
   test:
     needs: relay
@@ -19,19 +22,23 @@ jobs:
       - run: npm test
 ```
 
-The relay job doesn't use a runner or bill any minutes. RelayRunner answers it directly with a runner label: a free machine in your workspace, or the fallback when none is free.
+The relay job doesn't use a runner or bill any minutes. RelayRunner answers it directly with a runner label, trying the runners in your workspace's runner order and skipping the ones the job didn't name. If none of them fits, the relay job fails with the reason and `test` doesn't start.
 
 ### Inputs
 
-| Input | Default | Description |
-| --- | --- | --- |
-| `fallback` | `ubuntu-latest` | The runner label to use when no machine is free. Any `runs-on` label works, including another runner provider's. |
+Give one input per runner provider the job can use. A provider you leave out is never used for this job, even if it's in your runner order.
+
+| Input | Description |
+| --- | --- |
+| `machine` | Comma-separated labels a machine in your workspace must have, all of them. Every machine has `self-hosted`, so `machine: self-hosted` accepts any machine; narrow it with labels such as `macOS, ARM64`. Leave it out (or empty) if the job shouldn't run on your machines. |
+| `github` | The GitHub-hosted runner label to use, such as `ubuntu-latest` or `macos-latest`. Leave it out if the job shouldn't run on GitHub-hosted runners. |
 
 ```yaml
   relay:
     uses: relayrunner/actions/.github/workflows/relay.yml@v1
     with:
-      fallback: ubuntu-24.04
+      machine: macOS, ARM64
+      github: macos-latest
 ```
 
 ### Outputs
@@ -54,8 +61,14 @@ The relay job doesn't use a runner or bill any minutes. RelayRunner answers it d
   jobs:
     relay-build:
       uses: relayrunner/actions/.github/workflows/relay.yml@v1
+      with:
+        machine: self-hosted
+        github: ubuntu-latest
     relay-test:
       uses: relayrunner/actions/.github/workflows/relay.yml@v1
+      with:
+        machine: self-hosted
+        github: ubuntu-latest
     build:
       needs: relay-build
       runs-on: ${{ needs.relay-build.outputs.runner }}
@@ -66,7 +79,7 @@ The relay job doesn't use a runner or bill any minutes. RelayRunner answers it d
       # ...
   ```
 
-- **Public repositories always get the fallback.** RelayRunner never sends a public repository's jobs to your machines. Their relay job only runs if the Default runner group allows public repositories.
+- **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. Their relay job only runs if the Default runner group allows public repositories.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 

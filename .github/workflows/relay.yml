@@ -3,14 +3,20 @@
 #   jobs:
 #     relay:
 #       uses: relayrunner/actions/.github/workflows/relay.yml@v1
+#       with:
+#         machine: macOS, ARM64
+#         github: macos-latest
 #     test:
 #       needs: relay
 #       runs-on: ${{ needs.relay.outputs.runner }}
 #
+# The job says which runners can run it, one input per provider. The workspace's runner order in
+# the RelayRunner dashboard decides which of them to try first.
+#
 # The `relay` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
-# runner minutes are billed. The answer is a one-time label for a free machine in your workspace,
-# or `fallback` when none is free (public repos always get `fallback`).
+# runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
+# and the job that needs it doesn't start. Public repos never get a machine.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -19,14 +25,16 @@ name: RelayRunner relay
 on:
   workflow_call:
     inputs:
-      fallback:
-        description: Runner label to use when no machine is free, such as ubuntu-latest or another runner provider's label.
+      machine:
+        description: Comma-separated labels a workspace machine must have, all of them, to run this job. Use `self-hosted` for any machine, or narrow it, such as `macOS, ARM64`. Leave it out if the job shouldn't run on your machines.
         type: string
-        default: ubuntu-latest
+      github:
+        description: GitHub-hosted runner label for this job, such as ubuntu-latest. Leave it out if the job shouldn't run on GitHub-hosted runners.
+        type: string
     outputs:
       runner:
         description: The label to put in the next job's runs-on.
-        value: ${{ jobs.relay.outputs.runner || inputs.fallback }}
+        value: ${{ jobs.relay.outputs.runner }}
 
 jobs:
   relay:
@@ -38,6 +46,6 @@ jobs:
       # Only runs if an ordinary runner with the `relayrunner` label takes this job. The gateway
       # reports the output itself and skips this step.
       - id: route
-        env:
-          FALLBACK: ${{ inputs.fallback }}
-        run: echo "runner=$FALLBACK" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "::error title=RelayRunner didn't answer this relay::A runner other than RelayRunner's gateway took this relay job, so there is no runner to report. Remove the relayrunner label from your own runners."
+          exit 1

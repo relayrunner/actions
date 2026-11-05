@@ -1,6 +1,6 @@
 # Repository instructions
 
-This repo holds RelayRunner's public reusable workflows. Users reference them by path and tag, such as `relayrunner/actions/.github/workflows/relay.yml@v1`, so a workflow's inputs and outputs are a public API. Don't rename or remove an input or output within a major version.
+This repo holds RelayRunner's public reusable workflows. Users reference them by path and tag, such as `relayrunner/actions/.github/workflows/relay.yml@v1`, so a workflow's inputs and outputs are a public API. Don't rename or remove an input or output within a major version. Pre-releases (`vX.Y.Z-beta.N`) may break, since nobody follows a major tag to them.
 
 ## Commits and pull requests
 
