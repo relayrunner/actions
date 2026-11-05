@@ -1,0 +1,43 @@
+# RelayRunner relay: asks RelayRunner where the caller's next job should run.
+#
+#   jobs:
+#     relay:
+#       uses: relayrunner/actions/.github/workflows/relay.yml@v1
+#     test:
+#       needs: relay
+#       runs-on: ${{ needs.relay.outputs.runner }}
+#
+# The `relay` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
+# runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
+# runner minutes are billed. The answer is a one-time label for a free machine in your workspace,
+# or `fallback` when none is free (public repos always get `fallback`).
+#
+# One relay routes one job: a machine label can only be claimed once, so give each job that should
+# be able to run on a machine its own relay.
+name: RelayRunner relay
+
+on:
+  workflow_call:
+    inputs:
+      fallback:
+        description: Runner label to use when no machine is free, such as ubuntu-latest or another runner provider's label.
+        type: string
+        default: ubuntu-latest
+    outputs:
+      runner:
+        description: The label to put in the next job's runs-on.
+        value: ${{ jobs.relay.outputs.runner || inputs.fallback }}
+
+jobs:
+  relay:
+    name: RelayRunner
+    runs-on: relayrunner
+    outputs:
+      runner: ${{ steps.route.outputs.runner }}
+    steps:
+      # Only runs if an ordinary runner with the `relayrunner` label takes this job. The gateway
+      # reports the output itself and skips this step.
+      - id: route
+        env:
+          FALLBACK: ${{ inputs.fallback }}
+        run: echo "runner=$FALLBACK" >> "$GITHUB_OUTPUT"

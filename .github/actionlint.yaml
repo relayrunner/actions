@@ -1,0 +1,4 @@
+self-hosted-runner:
+  # RelayRunner's gateway answers jobs that ask for this label.
+  labels:
+    - relayrunner
