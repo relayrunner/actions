@@ -1,20 +1,20 @@
-# RelayRunner pick: asks RelayRunner where the caller's next job should run.
+# RelayRunner relay: asks RelayRunner where the caller's next job should run.
 #
 #   jobs:
-#     pick:
-#       uses: relayrunner/actions/.github/workflows/pick.yml@v1
+#     relay:
+#       uses: relayrunner/actions/.github/workflows/relay.yml@v1
 #     test:
-#       needs: pick
-#       runs-on: ${{ needs.pick.outputs.runner }}
+#       needs: relay
+#       runs-on: ${{ needs.relay.outputs.runner }}
 #
-# The `pick` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
+# The `relay` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
 # runner minutes are billed. The answer is a one-time label for a free machine in your workspace,
 # or `fallback` when none is free (public repos always get `fallback`).
 #
-# One pick routes one job: a machine label can only be claimed once, so give each job that should
-# be able to run on a machine its own pick.
-name: RelayRunner pick
+# One relay routes one job: a machine label can only be claimed once, so give each job that should
+# be able to run on a machine its own relay.
+name: RelayRunner relay
 
 on:
   workflow_call:
@@ -26,10 +26,10 @@ on:
     outputs:
       runner:
         description: The label to put in the next job's runs-on.
-        value: ${{ jobs.pick.outputs.runner || inputs.fallback }}
+        value: ${{ jobs.relay.outputs.runner || inputs.fallback }}
 
 jobs:
-  pick:
+  relay:
     name: RelayRunner
     runs-on: relayrunner
     outputs:
