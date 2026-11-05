@@ -25,9 +25,8 @@ name: RelayRunner relay
 on:
   workflow_call:
     inputs:
-      # No defaults: RelayRunner tells an input the caller left out from one it set.
       machine:
-        description: Comma-separated labels a workspace machine must have to run this job, such as `macOS, ARM64`. Empty means any machine.
+        description: Comma-separated labels a workspace machine must have, all of them, to run this job. Use `self-hosted` for any machine, or narrow it, such as `macOS, ARM64`. Leave it out if the job shouldn't run on your machines.
         type: string
       github:
         description: GitHub-hosted runner label for this job, such as ubuntu-latest. Leave it out if the job shouldn't run on GitHub-hosted runners.

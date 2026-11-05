@@ -11,7 +11,7 @@ jobs:
   relay:
     uses: relayrunner/actions/.github/workflows/relay.yml@v1
     with:
-      machine: ""             # any machine in your workspace
+      machine: self-hosted    # any machine in your workspace
       github: ubuntu-latest   # or GitHub-hosted ubuntu-latest
 
   test:
@@ -30,7 +30,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 
 | Input | Description |
 | --- | --- |
-| `machine` | Comma-separated labels a machine in your workspace must have, such as `macOS, ARM64`. Set it to `""` to accept any machine. Leave it out if the job shouldn't run on your machines. |
+| `machine` | Comma-separated labels a machine in your workspace must have, all of them. Every machine has `self-hosted`, so `machine: self-hosted` accepts any machine; narrow it with labels such as `macOS, ARM64`. Leave it out (or empty) if the job shouldn't run on your machines. |
 | `github` | The GitHub-hosted runner label to use, such as `ubuntu-latest` or `macos-latest`. Leave it out if the job shouldn't run on GitHub-hosted runners. |
 
 ```yaml
@@ -62,12 +62,12 @@ Give one input per runner provider the job can use. A provider you leave out is 
     relay-build:
       uses: relayrunner/actions/.github/workflows/relay.yml@v1
       with:
-        machine: ""
+        machine: self-hosted
         github: ubuntu-latest
     relay-test:
       uses: relayrunner/actions/.github/workflows/relay.yml@v1
       with:
-        machine: ""
+        machine: self-hosted
         github: ubuntu-latest
     build:
       needs: relay-build
