@@ -83,6 +83,30 @@ Give one input per runner provider the job can use. A provider you leave out is 
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 
+## Run a check without a runner
+
+Some checks only read the pull request, so they don't need a machine at all. Put the check in its own job on `runs-on: relayrunner`, and RelayRunner answers it directly: the job passes or fails in a few seconds, with no runner and no billed minutes.
+
+```yaml
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  pr-title:
+    runs-on: relayrunner
+    steps:
+      - uses: relayrunner/actions/checks/pr-title@v1
+```
+
+| Check | What it does | Inputs |
+| --- | --- | --- |
+| `checks/pr-title` | Fails unless the pull request title is a [Conventional Commit](https://www.conventionalcommits.org/), such as `feat(api): add a check`. | `types`: comma-separated types the title may use. Defaults to `feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert`. |
+
+- **Every step must be a check.** RelayRunner runs the job itself only when all of its steps are RelayRunner checks with plain (not `${{ }}`) inputs. Otherwise the job fails and says why, so move other steps to their own job.
+- **It works on any runner.** Each check is also an ordinary action, so the same job runs on `ubuntu-latest` or your own runner if you point it there.
+- **Keep the job name stable** if you make it a required check. The check appears under the job's name, as any job does.
+
 ## Versions
 
 Use `@v1` to get fixes and new features without breaking changes, or pin a release tag or commit SHA. See [releases](https://github.com/relayrunner/actions/releases).

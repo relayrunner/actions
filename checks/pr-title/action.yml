@@ -1,0 +1,51 @@
+# RelayRunner PR title check: fails unless the pull request title is a Conventional Commit.
+#
+#   jobs:
+#     pr-title:
+#       runs-on: relayrunner
+#       steps:
+#         - uses: relayrunner/actions/checks/pr-title@v1
+#
+# On `runs-on: relayrunner`, RelayRunner's gateway answers this job itself: it reads the title from
+# the job, passes or fails it, and skips these steps, so no runner minutes are billed. On any other
+# runner the script below does the same check, so the job still works if you point it elsewhere.
+name: RelayRunner PR title check
+description: 'Check that the pull request title is a Conventional Commit, such as "feat(api): add a check".'
+inputs:
+  types:
+    description: Comma-separated types the title may use. Defaults to feat, fix, docs, style, refactor, perf, test, build, ci, chore and revert.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Check the pull request title
+      shell: bash
+      env:
+        TITLE: ${{ github.event.pull_request.title }}
+        HAS_PULL_REQUEST: ${{ github.event.pull_request != null }}
+        TYPES: ${{ inputs.types }}
+      run: |
+        if [[ "$HAS_PULL_REQUEST" != "true" ]]; then
+          echo "::error title=PR title check::The pr-title check reads the pull request's title, so run it on pull_request events."
+          exit 1
+        fi
+        title="$(printf '%s' "$TITLE" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+        pattern='^([A-Za-z]+)(\([^()]+\))?!?: [^[:space:]].*$'
+        if [[ ! "$title" =~ $pattern ]]; then
+          echo "::error title=PR title check::The pull request title \"$TITLE\" isn't a Conventional Commit. Write it as type(scope): description, such as \"feat(api): add native checks\"."
+          exit 1
+        fi
+        type="${BASH_REMATCH[1]}"
+        allowed=()
+        IFS=$',\n' read -r -d '' -a raw <<< "${TYPES:-feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert}" || true
+        for item in "${raw[@]}"; do
+          item="$(printf '%s' "$item" | tr -d '[:space:]')"
+          [[ -n "$item" ]] && allowed+=("$item")
+        done
+        for item in "${allowed[@]}"; do
+          [[ "$item" == "$type" ]] && exit 0
+        done
+        list="$(printf '%s, ' "${allowed[@]}")"
+        echo "::error title=PR title check::The pull request title uses the type \"$type\". Use one of: ${list%, }."
+        exit 1
