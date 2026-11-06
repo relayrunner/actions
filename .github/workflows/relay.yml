@@ -16,7 +16,8 @@
 # The `relay` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
 # runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
-# and the job that needs it doesn't start. Public repos never get a machine.
+# and the job that needs it doesn't start. Public repos never get a machine. Blacksmith needs
+# Blacksmith's GitHub App installed on the org, and runs public repos too.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -30,6 +31,9 @@ on:
         type: string
       github:
         description: GitHub-hosted runner label for this job, such as ubuntu-latest. Leave it out if the job shouldn't run on GitHub-hosted runners.
+        type: string
+      blacksmith:
+        description: Blacksmith runner label for this job, such as blacksmith-2vcpu-ubuntu-2404. Leave it out if the job shouldn't run on Blacksmith.
         type: string
     outputs:
       runner:
