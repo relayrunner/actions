@@ -6,9 +6,21 @@ permissions:
   contents: read
 
 jobs:
+  # Routes this repo's own CI through the relay.yml on the same commit, so every change to the
+  # relay is tested by the PR that makes it. The repo is public, so it never gets a machine. Set
+  # the RELAYRUNNER_CI repo variable to `off` to skip the relay and run on ubuntu-latest.
+  relay:
+    if: vars.RELAYRUNNER_CI != 'off'
+    uses: ./.github/workflows/relay.yml
+    with:
+      github: ubuntu-latest
+
   actionlint:
     name: Lint workflows
-    runs-on: ubuntu-latest
+    needs: relay
+    # Runs when the relay picked a runner or was switched off; a failed relay still fails fast.
+    if: ${{ !cancelled() && (needs.relay.result == 'success' || needs.relay.result == 'skipped') }}
+    runs-on: ${{ needs.relay.outputs.runner || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v6
         with:
