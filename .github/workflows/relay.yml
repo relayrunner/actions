@@ -31,6 +31,9 @@ on:
       github:
         description: GitHub-hosted runner label for this job, such as ubuntu-latest. Leave it out if the job shouldn't run on GitHub-hosted runners.
         type: string
+      sandbox:
+        description: Experimental. Set to run this job in a Cloudflare Sandbox (Linux x64, with Docker), such as `linux`, or a size (`4x12`, `2x8`, `standard-2`). Leave it out if the job shouldn't run in a sandbox.
+        type: string
     outputs:
       runner:
         description: The label to put in the next job's runs-on.
