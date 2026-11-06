@@ -1,6 +1,6 @@
 # RelayRunner GitHub Actions
 
-Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends each GitHub Actions job to the first runner in your workspace's runner order that can take it, such as one of your own machines when one is online and free, or GitHub's hosted runners.
+Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends each GitHub Actions job to the first runner in your workspace's runner order that can take it, such as one of your own machines when one is online and free, Blacksmith, or GitHub's hosted runners.
 
 ## Relay a job to a runner
 
@@ -32,6 +32,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 | --- | --- |
 | `machine` | Comma-separated labels a machine in your workspace must have, all of them. Every machine has `self-hosted`, so `machine: self-hosted` accepts any machine; narrow it with labels such as `macOS, ARM64`. Leave it out (or empty) if the job shouldn't run on your machines. |
 | `github` | The GitHub-hosted runner label to use, such as `ubuntu-latest` or `macos-latest`. Leave it out if the job shouldn't run on GitHub-hosted runners. |
+| `blacksmith` | The [Blacksmith](https://www.blacksmith.sh) runner label to use, such as `blacksmith-2vcpu-ubuntu-2404`. It must start with `blacksmith-`. Leave it out if the job shouldn't run on Blacksmith. |
 
 ```yaml
   relay:
@@ -39,6 +40,15 @@ Give one input per runner provider the job can use. A provider you leave out is 
     with:
       machine: macOS, ARM64
       github: macos-latest
+```
+
+```yaml
+  relay:
+    uses: relayrunner/actions/.github/workflows/relay.yml@v1
+    with:
+      machine: self-hosted
+      blacksmith: blacksmith-4vcpu-ubuntu-2404
+      github: ubuntu-latest
 ```
 
 ### Outputs
@@ -80,6 +90,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
   ```
 
 - **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. Their relay job only runs if the Default runner group allows public repositories.
+- **Blacksmith needs its own GitHub App.** RelayRunner only hands the job a Blacksmith label, so Blacksmith's GitHub App must be installed on the repository's owner. RelayRunner can't see Blacksmith's capacity, so a Blacksmith step always takes a job with a Blacksmith label, public repositories included.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 
