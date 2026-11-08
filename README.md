@@ -96,7 +96,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 
 ## Run a check without a runner
 
-Some checks only read the pull request, so they don't need a machine at all. Put the check in its own job on `runs-on: relayrunner`, and RelayRunner answers it directly: the job passes or fails in a few seconds, with no runner and no billed minutes.
+Some checks don't need a machine of yours at all. Put the check in its own job on `runs-on: relayrunner`, and RelayRunner answers it directly: the job passes or fails in seconds, with no runner and no billed minutes.
 
 ```yaml
 on:
@@ -113,9 +113,28 @@ jobs:
 | Check | What it does | Inputs |
 | --- | --- | --- |
 | `checks/pr-title` | Fails unless the pull request title is a [Conventional Commit](https://www.conventionalcommits.org/), such as `feat(api): add a check`. | `types`: comma-separated types the title may use. Defaults to `feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert`. |
+| `checks/lint` | Runs linters on the commit (the pull request's head on `pull_request` events) and fails if any reports an error. Each tool also gets a `Lint / <tool>` check run with its problems as annotations. | `tools` (required): comma-separated linters, any of `oxlint`, `oxfmt`, `ruff`, `actionlint`, `zizmor`, `shellcheck` and `typos`. `paths`: comma-separated globs, such as `apps/**`; only problems in matching files count. |
+
+### Lint on demand
+
+`checks/lint` doesn't read the pull request, so it runs on any event. A `workflow_dispatch` workflow gives you a **Run workflow** button in the Actions tab that lints the branch you pick:
+
+```yaml
+on: workflow_dispatch
+
+jobs:
+  lint:
+    runs-on: relayrunner
+    steps:
+      - uses: relayrunner/actions/checks/lint@v1
+        with:
+          tools: oxlint, oxfmt, actionlint
+```
+
+RelayRunner lints the commit in its own sandbox, with no internet access, and posts the check runs through the RelayRunner Checks GitHub App, so install that App on the repository as well. The job uses only its own inputs and ignores any lint list in `relayrunner.yml`. Lint is in preview: RelayRunner runs it only for organizations it has enabled, and fails the job with the reason otherwise.
 
 - **Every step must be a check.** RelayRunner runs the job itself only when all of its steps are RelayRunner checks with plain (not `${{ }}`) inputs. Otherwise the job fails and says why, so move other steps to their own job.
-- **It works on any runner.** Each check is also an ordinary action, so the same job runs on `ubuntu-latest` or your own runner if you point it there.
+- **It works on any runner.** Each check is also an ordinary action, so the same job runs on `ubuntu-latest` or your own runner if you point it there. There, `checks/lint` checks out the commit, installs the tools with `npx` and `pipx`, and reports problems as annotations on the job instead of check runs.
 - **Keep the job name stable** if you make it a required check. The check appears under the job's name, as any job does.
 
 ## Versions

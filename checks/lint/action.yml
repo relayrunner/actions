@@ -1,0 +1,100 @@
+# RelayRunner lint check: runs the listed linters on the commit and fails if any reports an error.
+#
+#   jobs:
+#     lint:
+#       runs-on: relayrunner
+#       steps:
+#         - uses: relayrunner/actions/checks/lint@v1
+#           with:
+#             tools: oxlint, typos
+#
+# On `runs-on: relayrunner`, RelayRunner's gateway answers this job itself: it lints the commit in
+# its own container, posts a `Lint / <tool>` check run per tool (this needs the RelayRunner Checks
+# App on the repository), passes or fails the job, and skips these steps, so no runner minutes are
+# billed. On any other runner the steps below install and run the same tools, so the job still
+# works if you point it elsewhere. There, problems show as annotations on the job instead.
+name: RelayRunner lint check
+description: Run linters on the commit, such as oxlint, ruff or actionlint, and fail on any error.
+inputs:
+  tools:
+    description: Comma-separated linters to run. Any of oxlint, oxfmt, ruff, actionlint, zizmor, shellcheck and typos.
+    required: true
+  paths:
+    description: Comma-separated globs, such as "apps/**". Only problems in matching files count. Defaults to the whole repository.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Check out the commit
+      uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Run the linters
+      shell: bash
+      env:
+        TOOLS: ${{ inputs.tools }}
+        PATHS: ${{ inputs.paths }}
+        ACTIONLINT_VERSION: 1.7.7
+      run: |
+        known=" oxlint oxfmt ruff actionlint zizmor shellcheck typos "
+        split() { tr ',\n' '\n\n' <<< "$1" | tr -d '[:blank:]\r' | awk 'NF && !seen[$0]++'; }
+        mapfile -t tools < <(split "$TOOLS")
+        mapfile -t globs < <(split "$PATHS")
+        if [[ ${#tools[@]} -eq 0 ]]; then
+          echo "::error title=Lint check::The lint check's tools input takes a list of: oxlint, oxfmt, ruff, actionlint, zizmor, shellcheck, typos."
+          exit 1
+        fi
+        for tool in "${tools[@]}"; do
+          if [[ "$known" != *" $tool "* ]]; then
+            echo "::error title=Lint check::Unknown lint tool \"$tool\". Use any of: oxlint, oxfmt, ruff, actionlint, zizmor, shellcheck, typos."
+            exit 1
+          fi
+        done
+
+        # The tracked files a tool may look at: all of them, or those matching `paths`.
+        files() {
+          local spec=()
+          for glob in "${globs[@]}"; do spec+=(":(glob)${glob%/}" ":(glob)${glob%/}/**"); done
+          git ls-files -z -- "${spec[@]}" | grep -zE "$1" || true
+        }
+
+        failed=()
+        for tool in "${tools[@]}"; do
+          echo "::group::$tool"
+          case "$tool" in
+            actionlint | zizmor) pattern='^\.github/workflows/[^/]+\.ya?ml$' ;;
+            shellcheck) pattern='\.(sh|bash)$' ;;
+            *) pattern='' ;;
+          esac
+          mapfile -d '' -t targets < <(files "$pattern")
+          if [[ ${#targets[@]} -eq 0 ]]; then
+            echo "No files for $tool here."
+            echo "::endgroup::"
+            continue
+          fi
+          # A whole-repo run lets each tool apply its own ignore files.
+          [[ ${#globs[@]} -eq 0 && -z "$pattern" ]] && targets=(.)
+          status=0
+          case "$tool" in
+            oxlint) npx --yes oxlint --format=github "${targets[@]}" || status=$? ;;
+            oxfmt) npx --yes oxfmt --check "${targets[@]}" || status=$? ;;
+            ruff) pipx run ruff check --output-format=github "${targets[@]}" || status=$? ;;
+            zizmor) pipx run zizmor --offline --no-progress --format=github "${targets[@]}" || status=$? ;;
+            typos) pipx run typos "${targets[@]}" || status=$? ;;
+            shellcheck) shellcheck "${targets[@]}" || status=$? ;;
+            actionlint)
+              bash <(curl -sSfL "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "$ACTIONLINT_VERSION" "$RUNNER_TEMP" > /dev/null
+              "$RUNNER_TEMP/actionlint" "${targets[@]}" || status=$?
+              ;;
+          esac
+          echo "::endgroup::"
+          [[ $status -ne 0 ]] && failed+=("$tool")
+        done
+
+        if [[ ${#failed[@]} -gt 0 ]]; then
+          list="$(printf '%s, ' "${failed[@]}")"
+          echo "::error title=Lint check::Lint failed: ${list%, }."
+          exit 1
+        fi
