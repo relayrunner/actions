@@ -60,7 +60,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 ### Requirements
 
 - The [RelayRunner GitHub App](https://github.com/apps/relayrunner) is installed on the repository's owner and connected to a RelayRunner workspace.
-- The repository's owner is an organization. RelayRunner registers the runner that answers the relay job in the organization's Default runner group.
+- The repository's owner is an organization or a personal account. For an organization, RelayRunner registers the runner that answers the relay job in the organization's Default runner group, so that group must allow the repository. A personal account has no runner groups, so its runner registers on the repository itself.
 - If your organization limits which actions and reusable workflows can run, allow `relayrunner/actions/*`.
 
 ### Good to know
@@ -89,7 +89,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
       # ...
   ```
 
-- **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. Their relay job only runs if the Default runner group allows public repositories.
+- **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. In an organization, their relay job only runs if the Default runner group allows public repositories. Public repositories on a personal account need no setting.
 - **Blacksmith needs its own GitHub App.** RelayRunner only hands the job a Blacksmith label, so Blacksmith's GitHub App must be installed on the repository's owner. RelayRunner can't see Blacksmith's capacity, so a Blacksmith step always takes a job with a Blacksmith label, public repositories included.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
