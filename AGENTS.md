@@ -8,7 +8,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for every commi
 
 ## Releases
 
-Tag each release `vX.Y.Z` and move the major tag (`v1`) to it. Users follow the major tag, so a release must not break existing callers.
+Releases use [changesets](https://github.com/changesets/changesets). A PR that changes what callers get adds a `.changeset/*.md` file (see `.changeset/README.md`). The Release workflow opens a `chore: version packages` PR, and merging it tags `vX.Y.Z`, creates a GitHub release, and moves the major tag (`v1`) on stable releases. Never push release tags or bump `package.json` by hand. Users follow the major tag, so a stable release must not break existing callers.
 
 ## Checks
 
