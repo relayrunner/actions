@@ -20,7 +20,7 @@ Or write `.changeset/<slug>.md` by hand:
 What changed, written for someone who calls the workflow.
 ```
 
-Use `patch` for fixes, `minor` for new inputs or features and `major` for breaking changes. Docs-only and CI-only PRs don't need one.
+Use `patch` for fixes, `minor` for new inputs or features and `major` for breaking changes. Docs-only and CI-only PRs don't need one. `pnpm changeset:lint` (run in CI) rejects any other package name.
 
 ## Release flow
 
