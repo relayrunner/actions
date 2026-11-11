@@ -1,0 +1,84 @@
+# Releases this repo with changesets.
+#
+# - Pending .changeset/*.md files: open or update the "chore: version packages" PR.
+# - None left (that PR was just merged): tag v<version> from package.json and
+#   create a GitHub release. A stable release also moves the major tag (v1),
+#   which is what users follow. Pre-releases never move it.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Version or tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # push the version branch, tags and releases
+      pull-requests: write # open the version PR
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history and tags, so changesets can find the last release
+          # and the tag check below sees existing tags.
+          fetch-depth: 0
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+
+      - name: Open or update the version PR
+        id: changesets
+        uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1.7.0
+        with:
+          version: pnpm run changeset:version
+          commit: "chore: version packages"
+          title: "chore: version packages"
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag and create the GitHub release
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          tag="v$version"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists."
+            exit 0
+          fi
+
+          notes="$(awk -v v="## $version" '
+            $0 == v { found=1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md 2>/dev/null || true)"
+
+          prerelease=()
+          if [[ "$version" == *-* ]]; then prerelease=(--prerelease); fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
+            --notes "${notes:-$tag}" "${prerelease[@]}"
+
+          # Users follow the major tag, so move it to each stable release.
+          if [[ "$version" != *-* ]]; then
+            major="v${version%%.*}"
+            git tag -f "$major" "$GITHUB_SHA"
+            git push -f origin "refs/tags/$major"
+            echo "Moved $major to $tag."
+          fi
