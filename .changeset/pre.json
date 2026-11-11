@@ -4,5 +4,7 @@
   "initialVersions": {
     "@relayrunner/actions": "1.0.0-beta.4"
   },
-  "changesets": []
+  "changesets": [
+    "hosted-provider-inputs"
+  ]
 }

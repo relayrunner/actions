@@ -1,6 +1,6 @@
 {
   "name": "@relayrunner/actions",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "private": true,
   "description": "RelayRunner's reusable workflows and actions. Released as vX.Y.Z tags, not to npm.",
   "packageManager": "pnpm@11.28.9",
