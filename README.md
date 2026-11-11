@@ -1,6 +1,6 @@
 # RelayRunner GitHub Actions
 
-Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends each GitHub Actions job to the first runner in your workspace's runner order that can take it, such as one of your own machines when one is online and free, Blacksmith, or GitHub's hosted runners.
+Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner). RelayRunner sends each GitHub Actions job to the first runner in your workspace's runner order that can take it, such as one of your own machines when one is online and free, a hosted provider like Blacksmith or Depot, or GitHub's hosted runners.
 
 ## Relay a job to a runner
 
@@ -33,6 +33,11 @@ Give one input per runner provider the job can use. A provider you leave out is 
 | `machine` | Comma-separated labels a machine in your workspace must have, all of them. Every machine has `self-hosted`, so `machine: self-hosted` accepts any machine; narrow it with labels such as `macOS, ARM64`. Leave it out (or empty) if the job shouldn't run on your machines. |
 | `github` | The GitHub-hosted runner label to use, such as `ubuntu-latest` or `macos-latest`. Leave it out if the job shouldn't run on GitHub-hosted runners. |
 | `blacksmith` | The [Blacksmith](https://www.blacksmith.sh) runner label to use, such as `blacksmith-2vcpu-ubuntu-2404`. It must start with `blacksmith-`. Leave it out if the job shouldn't run on Blacksmith. |
+| `depot` | The [Depot](https://depot.dev) runner label to use, such as `depot-ubuntu-24.04`. It must start with `depot-`. |
+| `namespace` | The [Namespace](https://namespace.so) runner label to use, such as `namespace-profile-default`. It must start with `namespace-profile-` or `nscloud-`. |
+| `warpbuild` | The [WarpBuild](https://www.warpbuild.com) runner label to use, such as `warp-ubuntu-latest-x64-2x`. It must start with `warp-`. |
+| `ubicloud` | The [Ubicloud](https://www.ubicloud.com) runner label to use, such as `ubicloud-standard-2`. It must be `ubicloud` or start with `ubicloud-`. |
+| `runs-on` | The [RunsOn](https://runs-on.com) runner label to use, as one label, such as `runs-on=${{ github.run_id }}/runner=2cpu-linux-x64`. |
 
 ```yaml
   relay:
@@ -90,7 +95,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
   ```
 
 - **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. In an organization, their relay job only runs if the Default runner group allows public repositories. Public repositories on a personal account need no setting.
-- **Blacksmith needs its own GitHub App.** RelayRunner only hands the job a Blacksmith label, so Blacksmith's GitHub App must be installed on the repository's owner. RelayRunner can't see Blacksmith's capacity, so a Blacksmith step always takes a job with a Blacksmith label, public repositories included.
+- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud or RunsOn) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 

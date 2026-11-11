@@ -16,8 +16,9 @@
 # The `relay` job below asks for the `relayrunner` label. RelayRunner's gateway answers it as a
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
 # runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
-# and the job that needs it doesn't start. Public repos never get a machine. Blacksmith needs
-# Blacksmith's GitHub App installed on the org, and runs public repos too.
+# and the job that needs it doesn't start. Public repos never get a machine. A hosted provider
+# (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, RunsOn) needs its own GitHub App installed on
+# the org, and runs public repos too.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -34,6 +35,21 @@ on:
         type: string
       blacksmith:
         description: Blacksmith runner label for this job, such as blacksmith-2vcpu-ubuntu-2404. Leave it out if the job shouldn't run on Blacksmith.
+        type: string
+      depot:
+        description: Depot runner label for this job, such as depot-ubuntu-24.04. Leave it out if the job shouldn't run on Depot.
+        type: string
+      namespace:
+        description: Namespace runner label for this job, such as namespace-profile-default. Leave it out if the job shouldn't run on Namespace.
+        type: string
+      warpbuild:
+        description: WarpBuild runner label for this job, such as warp-ubuntu-latest-x64-2x. Leave it out if the job shouldn't run on WarpBuild.
+        type: string
+      ubicloud:
+        description: Ubicloud runner label for this job, such as ubicloud-standard-2. Leave it out if the job shouldn't run on Ubicloud.
+        type: string
+      runs-on:
+        description: RunsOn runner label for this job, such as runs-on=<run id>/runner=2cpu-linux-x64 with the run id from github.run_id. Leave it out if the job shouldn't run on RunsOn.
         type: string
     outputs:
       runner:
