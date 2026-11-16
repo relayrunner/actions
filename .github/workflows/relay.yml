@@ -17,8 +17,8 @@
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
 # runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
 # and the job that needs it doesn't start. Public repos never get a machine. A hosted provider
-# (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, RunsOn) needs its own GitHub App installed on
-# the org, and runs public repos too.
+# (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn) needs its own GitHub App
+# installed on the org, and all but Boat run public repos too.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -47,6 +47,9 @@ on:
         type: string
       ubicloud:
         description: Ubicloud runner label for this job, such as ubicloud-standard-2. Leave it out if the job shouldn't run on Ubicloud.
+        type: string
+      boat:
+        description: Boat runner label for this job, such as boat or boat-large. Leave it out if the job shouldn't run on Boat.
         type: string
       runs-on:
         description: RunsOn runner label for this job, such as runs-on=<run id>/runner=2cpu-linux-x64 with the run id from github.run_id. Leave it out if the job shouldn't run on RunsOn.

@@ -37,6 +37,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 | `namespace` | The [Namespace](https://namespace.so) runner label to use, such as `namespace-profile-default`. It must start with `namespace-profile-` or `nscloud-`. |
 | `warpbuild` | The [WarpBuild](https://www.warpbuild.com) runner label to use, such as `warp-ubuntu-latest-x64-2x`. It must start with `warp-`. |
 | `ubicloud` | The [Ubicloud](https://www.ubicloud.com) runner label to use, such as `ubicloud-standard-2`. It must be `ubicloud` or start with `ubicloud-`. |
+| `boat` | The [Boat](https://docs.boat.dev/ci) runner label to use, such as `boat` or `boat-large`. It must be `boat` or start with `boat-`. Boat runs Linux x64 only and skips public repositories. |
 | `runs-on` | The [RunsOn](https://runs-on.com) runner label to use, as one label, such as `runs-on=${{ github.run_id }}/runner=2cpu-linux-x64`. |
 
 ```yaml
@@ -95,7 +96,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
   ```
 
 - **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. In an organization, their relay job only runs if the Default runner group allows public repositories. Public repositories on a personal account need no setting.
-- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud or RunsOn) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included.
+- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat or RunsOn) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included. Boat is the exception: it refuses public repositories by default, so RelayRunner skips it for them.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 
