@@ -38,6 +38,13 @@ Give one input per runner provider the job can use. A provider you leave out is 
 | `warpbuild` | The [WarpBuild](https://www.warpbuild.com) runner label to use, such as `warp-ubuntu-latest-x64-2x`. It must start with `warp-`. |
 | `ubicloud` | The [Ubicloud](https://www.ubicloud.com) runner label to use, such as `ubicloud-standard-2`. It must be `ubicloud` or start with `ubicloud-`. |
 | `boat` | The [Boat](https://docs.boat.dev/ci) runner label to use, such as `boat` or `boat-large`. It must be `boat` or start with `boat-`. Boat runs Linux x64 only and skips public repositories. |
+| `starsling` | The [StarSling](https://docs.starsling.dev) runner label to use, such as `starsling-ubuntu-24.04-2`. It must start with `starsling-`. StarSling runs organizations' repositories only. |
+| `monkci` | The [Monk CI](https://monkci.com/docs) runner label to use, such as `monkci-ubuntu-24.04-2`. It must start with `monkci-`. Monk CI runs organizations' repositories only. |
+| `runloft` | The [Runloft](https://runloft.dev/docs/) runner label to use, such as `runloft-ubuntu-24.04`. It must start with `runloft-`. |
+| `latchkey` | The [Latchkey](https://latchkey.dev/documentation) runner label to use, such as `latchkey-small`. It must start with `latchkey-`. Latchkey runs organizations' repositories only. |
+| `berrybox` | The [BerryBox](https://docs.berrybox.io) runner label to use, such as `berrybox-2vcpu-ubuntu-2404`. It must start with `berrybox-`. BerryBox runs organizations' private repositories only. |
+| `celesto` | The [Celesto](https://celesto.ai/docs/ci) runner label to use, such as `celesto-standard`. It must be `celesto` or start with `celesto-`. |
+| `instabox` | The [InstaBox](https://instabox.sh/docs/use-cases/ci) runner label to use, such as `instabox-medium`. It must start with `instabox-`. |
 | `runs-on` | The [RunsOn](https://runs-on.com) runner label to use, as one label, such as `runs-on=${{ github.run_id }}/runner=2cpu-linux-x64`. |
 
 ```yaml
@@ -96,7 +103,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
   ```
 
 - **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. In an organization, their relay job only runs if the Default runner group allows public repositories. Public repositories on a personal account need no setting.
-- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat or RunsOn) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included. Boat is the exception: it refuses public repositories by default, so RelayRunner skips it for them.
+- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn, StarSling, Monk CI, Runloft, Latchkey, BerryBox, Celesto or InstaBox) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included. The exceptions: Boat and BerryBox refuse public repositories, so RelayRunner skips them for those, and StarSling, Monk CI, Latchkey and BerryBox only run organizations' repositories, so RelayRunner skips them for personal accounts.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 
