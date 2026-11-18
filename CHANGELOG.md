@@ -1,5 +1,11 @@
 # @relayrunner/actions
 
+## 1.0.0-beta.8
+
+### Minor Changes
+
+- 0756b37: `relay.yml` takes a `lizard` input, so RelayRunner can route a job to Lizard runners.
+
 ## 1.0.0-beta.7
 
 ### Minor Changes
