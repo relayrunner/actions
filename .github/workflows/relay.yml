@@ -17,8 +17,9 @@
 # runner of its own: it claims the job, reports the `runner` output and skips the steps, so no
 # runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
 # and the job that needs it doesn't start. Public repos never get a machine. A hosted provider
-# (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn) needs its own GitHub App
-# installed on the org, and all but Boat run public repos too.
+# (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn, StarSling, Monk CI, Runloft,
+# Latchkey, BerryBox, Celesto, InstaBox) needs its own GitHub App installed on the org. Boat and
+# BerryBox skip public repos, and StarSling, Monk CI, Latchkey and BerryBox skip personal accounts.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -53,6 +54,27 @@ on:
         type: string
       runs-on:
         description: RunsOn runner label for this job, such as runs-on=<run id>/runner=2cpu-linux-x64 with the run id from github.run_id. Leave it out if the job shouldn't run on RunsOn.
+        type: string
+      starsling:
+        description: StarSling runner label for this job, such as starsling-ubuntu-24.04-2. Leave it out if the job shouldn't run on StarSling.
+        type: string
+      monkci:
+        description: Monk CI runner label for this job, such as monkci-ubuntu-24.04-2. Leave it out if the job shouldn't run on Monk CI.
+        type: string
+      runloft:
+        description: Runloft runner label for this job, such as runloft-ubuntu-24.04. Leave it out if the job shouldn't run on Runloft.
+        type: string
+      latchkey:
+        description: Latchkey runner label for this job, such as latchkey-small. Leave it out if the job shouldn't run on Latchkey.
+        type: string
+      berrybox:
+        description: BerryBox runner label for this job, such as berrybox-2vcpu-ubuntu-2404. Leave it out if the job shouldn't run on BerryBox.
+        type: string
+      celesto:
+        description: Celesto runner label for this job, such as celesto-standard. Leave it out if the job shouldn't run on Celesto.
+        type: string
+      instabox:
+        description: InstaBox runner label for this job, such as instabox-medium. Leave it out if the job shouldn't run on InstaBox.
         type: string
     outputs:
       runner:
