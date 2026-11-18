@@ -1,5 +1,11 @@
 # @relayrunner/actions
 
+## 1.0.0-beta.7
+
+### Minor Changes
+
+- 9a6cf39: `relay.yml` takes `starsling`, `monkci`, `runloft`, `latchkey`, `berrybox`, `celesto` and `instabox` inputs, so RelayRunner can route a job to those runner clouds.
+
 ## 1.0.0-beta.6
 
 ### Minor Changes
