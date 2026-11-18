@@ -18,8 +18,9 @@
 # runner minutes are billed. When no runner fits, the gateway fails the relay job with the reason,
 # and the job that needs it doesn't start. Public repos never get a machine. A hosted provider
 # (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn, StarSling, Monk CI, Runloft,
-# Latchkey, BerryBox, Celesto, InstaBox) needs its own GitHub App installed on the org. Boat and
-# BerryBox skip public repos, and StarSling, Monk CI, Latchkey and BerryBox skip personal accounts.
+# Latchkey, BerryBox, Celesto, InstaBox, Lizard) needs its own GitHub App installed on the org. Boat
+# and BerryBox skip public repos, and StarSling, Monk CI, Latchkey, BerryBox and Lizard skip
+# personal accounts.
 #
 # One relay routes one job: a machine label can only be claimed once, so give each job that should
 # be able to run on a machine its own relay.
@@ -75,6 +76,9 @@ on:
         type: string
       instabox:
         description: InstaBox runner label for this job, such as instabox-medium. Leave it out if the job shouldn't run on InstaBox.
+        type: string
+      lizard:
+        description: Lizard runner label for this job, such as lizard-medium-ubuntu-2404. Leave it out if the job shouldn't run on Lizard.
         type: string
     outputs:
       runner:
