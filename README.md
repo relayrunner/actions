@@ -46,6 +46,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
 | `celesto` | The [Celesto](https://celesto.ai/docs/ci) runner label to use, such as `celesto-standard`. It must be `celesto` or start with `celesto-`. |
 | `instabox` | The [InstaBox](https://instabox.sh/docs/use-cases/ci) runner label to use, such as `instabox-medium`. It must start with `instabox-`. |
 | `lizard` | The [Lizard](https://lizard.build/ci) runner label to use, such as `lizard-medium-ubuntu-2404`. It must start with `lizard-`. Lizard runs organizations' repositories only. |
+| `groundbox` | The [Groundbox](https://groundbox.dev/docs/ci) runner label to use, such as `groundbox-4vcpu`. It must be `groundbox` or start with `groundbox-`. |
 | `runs-on` | The [RunsOn](https://runs-on.com) runner label to use, as one label, such as `runs-on=${{ github.run_id }}/runner=2cpu-linux-x64`. |
 
 ```yaml
@@ -104,7 +105,7 @@ Give one input per runner provider the job can use. A provider you leave out is 
   ```
 
 - **Public repositories never run on your machines.** RelayRunner skips machines for a public repository's jobs, so give them a `github` label. In an organization, their relay job only runs if the Default runner group allows public repositories. Public repositories on a personal account need no setting.
-- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn, StarSling, Monk CI, Runloft, Latchkey, BerryBox, Celesto, InstaBox or Lizard) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included. The exceptions: Boat and BerryBox refuse public repositories, so RelayRunner skips them for those, and StarSling, Monk CI, Latchkey, BerryBox and Lizard only run organizations' repositories, so RelayRunner skips them for personal accounts.
+- **Hosted providers need their own GitHub App.** RelayRunner only hands the job a label, so the provider's GitHub App (Blacksmith, Depot, Namespace, WarpBuild, Ubicloud, Boat, RunsOn, StarSling, Monk CI, Runloft, Latchkey, BerryBox, Celesto, InstaBox, Lizard or Groundbox) must be installed on the repository's owner. RelayRunner can't see a provider's capacity, so its step always takes a job with one of its labels, public repositories included. The exceptions: Boat and BerryBox refuse public repositories, so RelayRunner skips them for those, and StarSling, Monk CI, Latchkey, BerryBox and Lizard only run organizations' repositories, so RelayRunner skips them for personal accounts.
 - **The relay waits for RelayRunner.** If the App isn't installed, or RelayRunner can't be reached, the relay job stays queued until GitHub gives up on it, after 24 hours.
 - **The relay appears as `relay / RelayRunner`** in your workflow run.
 
