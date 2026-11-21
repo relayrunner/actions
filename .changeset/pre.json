@@ -6,6 +6,7 @@
   },
   "changesets": [
     "boat-input",
+    "groundbox-input",
     "hosted-provider-inputs",
     "lizard-input",
     "runner-cloud-inputs"
