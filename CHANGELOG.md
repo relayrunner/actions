@@ -1,5 +1,11 @@
 # @relayrunner/actions
 
+## 1.0.0-beta.9
+
+### Minor Changes
+
+- 2865dd4: `relay.yml` takes a `groundbox` input, so RelayRunner can route a job to Groundbox runners.
+
 ## 1.0.0-beta.8
 
 ### Minor Changes
