@@ -4,15 +4,15 @@ Reusable workflows for [RelayRunner](https://github.com/relayrunner/relayrunner)
 
 ## Relay a job to a runner
 
-Add a `relay` job that says which runners can run your job, then point the job at its output:
+Add a `relay` job that says what your job needs, then point the job at its output:
 
 ```yaml
 jobs:
   relay:
     uses: relayrunner/actions/.github/workflows/relay.yml@v1
     with:
-      machine: self-hosted    # any machine in your workspace
-      github: ubuntu-latest   # or GitHub-hosted ubuntu-latest
+      os: linux   # linux, macos or windows
+      cpus: 4     # at least 4 CPUs
 
   test:
     needs: relay
@@ -22,11 +22,21 @@ jobs:
       - run: npm test
 ```
 
-The relay job doesn't use a runner or bill any minutes. RelayRunner answers it directly with a runner label, trying the runners in your workspace's runner order and skipping the ones the job didn't name. If none of them fits, the relay job fails with the reason and `test` doesn't start.
+The relay job doesn't use a runner or bill any minutes. RelayRunner answers it directly with a runner label, trying the runners in your workspace's runner order. Each hosted provider gets its smallest runner that fits the job, and a machine fits when it has the OS and enough cores. If none of them fits, the relay job fails with the reason and `test` doesn't start.
 
-### Inputs
+### What the job needs
 
-Give one input per runner provider the job can use. A provider you leave out is never used for this job, even if it's in your runner order.
+| Input | Description |
+| --- | --- |
+| `os` | `linux`, `macos` or `windows`. Defaults to `linux`. |
+| `arch` | `x64` or `arm64`. Leave it out for the OS's usual one on hosted runners (x64 for Linux and Windows, Apple silicon for macOS). Your machines then fit whatever their arch. |
+| `cpus` | The fewest CPUs the job needs. Leave it out to use the size you pick for the job on the dashboard's Router page. |
+
+Every provider in your runner order can take a job that sets any of these. A provider with no runner that fits, such as one with no macOS runners, is skipped, and the Activity page says why.
+
+### Exact labels
+
+To use a specific label, give the provider's input below. With `os`, `arch` or `cpus` set, that provider uses your label as written and the others are still sized for the job. Without them, only the providers you name can take the job, and a provider you leave out is never used, even if it's in your runner order.
 
 | Input | Description |
 | --- | --- |
