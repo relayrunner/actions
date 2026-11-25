@@ -1,5 +1,11 @@
 # @relayrunner/actions
 
+## 1.0.0-beta.10
+
+### Minor Changes
+
+- e9e8c4e: `relay.yml` takes `os`, `arch` and `cpus` inputs, so a job can say what it needs and RelayRunner sizes a runner from every provider in the workspace's runner order.
+
 ## 1.0.0-beta.9
 
 ### Minor Changes
