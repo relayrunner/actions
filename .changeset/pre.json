@@ -9,6 +9,7 @@
     "groundbox-input",
     "hosted-provider-inputs",
     "lizard-input",
-    "runner-cloud-inputs"
+    "runner-cloud-inputs",
+    "shape-inputs"
   ]
 }
